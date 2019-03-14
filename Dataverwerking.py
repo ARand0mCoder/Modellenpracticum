@@ -1,15 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import datetime
 from dateutil import parser
 
 #%%
 
 path = r'C:\Users\dion\Documents\Studie\Modellenpracticum\Uilenburg_1_2018_clean.csv'
-time = []           # Time and day
-power = []          # Data of power from excel
-isDayFirst = False  # Used for date parsing
-checkDate = True    # When to stop checking date parsing
+time = []               # Time and day
+power = []              # Data of power from excel
+isDayFirst = False      # Used for date parsing
+checkDate = True        # When to stop checking date parsing
+previousTime = ''       # For checking double time values
 
 with open(path) as csv_file:
     csv_reader = csv.reader(csv_file,delimiter=';') # Read excel file as .csv
@@ -20,29 +22,53 @@ with open(path) as csv_file:
             print(f'Kolommen zijn: {", ".join(columns)}')
             print('\nAan het inlezen...')
         else:
-            if checkDate and row[0][0:3] == '1-2': # Checking if date is given by month-day or day-month
+            # Checking if date is given by month-day or day-month
+            if checkDate and row[0][0:3] == '1-2':
                 checkDate = False
             elif checkDate and row[0][0:3] == '2-1':
                 checkDate = False
                 isDayFirst = True
-            time.append(parser.parse(row[0]+' '+row[1], dayfirst=isDayFirst)) # Parse date and time
+            # Stores power data
             temp_line = []
             for elem in row[2:]:
                 temp_line.append(float(elem))
-            power.append(temp_line)  # Stores power data
+            if row[1] == previousTime: # Same time occured one before
+                power[len(power)-1] = np.divide(power[len(power)-1] + temp_line,2)
+            else:
+                power.append(temp_line)
+                time.append(parser.parse(row[0]+' '+row[1], dayfirst=isDayFirst))
+            previousTime = row[1]
         if line_count % 10000 == 0:  # Prints progress
             print(line_count)
         line_count += 1
     print(f'Well, that was easy. Totaal {line_count} regels ingelezen.')
-    
-#%%
 
+#%%
+                  
+''' All data throughout the year '''
 def plot_data():
     for i in range(len(row)-2):
         # plt.figure()
-        data = np.array([np.array(line[i]) for line in power])
-        plt.plot(time, data)
-        plt.show()
+        data = [line[i] for line in power]
+        plt.plot(time,data)
+    plt.show()
+
+#%%                  
+                  
+''' One specific time throughout the year '''
+def plot_specific_time():
+    data = []
+    timeData = datetime.time(12,0)
+
+    for j in range(len(row)-2):
+        Xdata = []
+        Ydata = []
+        for i in range(len(power)):
+            if time[i].time() == timeData:
+                Xdata.append(time[i])
+                Ydata.append(power[i][j])
+        plt.plot(Xdata,Ydata)
+    plt.show()
 
 #%%
 
