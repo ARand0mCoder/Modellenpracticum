@@ -1,11 +1,12 @@
 import numpy as np
 import random
 
-def Norm(array): #Calculates the norm of an array (globally defined)
+def Norm2(array): #Calculates the norm of an array (globally defined)
     return np.amax(np.abs(array))   
     
-def MaxNorm(Data, Sol): # Calculates the maximum of the norms of a solution
+def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     AllNorms = []
+    
     for group in range(len(Sol)):
         array = np.zeros(len(Data[0]))
         for station in Sol[group]:
@@ -32,18 +33,17 @@ def MonteCarloTwist(groups, prob):  #groups given as indices of the stations
                 else:
                     NewDist[RandomNum].append(station)
     return NewDist
-    
-def MonteCarlo(algoSol, Data, Iterations, prob):
+
+def MonteCarloTwistAlg(algoSol, Data, Iterations, prob, RejectionRate, Norm):
     
     oldSol = algoSol[:]
-    oldNorm = MaxNorm(Data, oldSol)
-    
+    oldNorm = MaxNorm(Data, oldSol, Norm)
     currentSol = algoSol[:]
     currentNorm = oldNorm
 
     for iteration in range(Iterations):
         newSol = MonteCarloTwist(currentSol, prob)
-        newNorm = MaxNorm(Data, newSol)
+        newNorm = MaxNorm(Data, newSol, Norm)
         
         if newNorm < currentNorm:  
             # take the new solution when the norm is smaller
@@ -54,12 +54,54 @@ def MonteCarlo(algoSol, Data, Iterations, prob):
             if random.randrange(2) == 0:
                 currentSol = newSol[:]
                 currentNorm = newNorm
-    return currentSol, currentNorm, oldSol, oldNorm
+        else:  
+            if random.random() > RejectionRate:
+                currentSol = newSol[:]
+                currentNorm = newNorm
+    return currentNorm, currentSol #, oldSol, oldNorm
+        
+def MonteCarloSwap(groups):
+    numberofgroups = sum(len(group) for group in groups)
+    items = random.sample(list(range(numberofgroups)),2)
+    item1 = items[0]
+    item2 = items[1]
+    newgroups = []
+    for group in groups:
+        if item1 in group and not item2 in group:
+            group.remove(item1)
+            group.append(item2)
+        if item2 in group and not item1 in group:
+            group.remove(item2)
+            group.append(item1)
+        newgroups.append(group)
+    return newgroups
     
+def MonteCarloSwapAlg(algoSol, Data, Iterations, RejectionRate, Norm):
+
+    oldSol = algoSol[:]
+    oldNorm = MaxNorm(Data, oldSol, Norm)
+    currentSol = algoSol[:]
+    currentNorm = oldNorm
+
+    for iteration in range(Iterations):
+        newSol = MonteCarloSwap(currentSol)
+        newNorm = MaxNorm(Data, newSol, Norm)
+        
+        if newNorm < currentNorm:  
+            # take the new solution when the norm is smaller
+            currentSol = newSol[:]
+            currentNorm = newNorm
+        else:  
+            if random.random() > RejectionRate:
+                currentSol = newSol[:]
+                currentNorm = newNorm
+    return currentNorm, currentSol  #, oldSol, oldNorm
     
-Test = [[2,5,3],[3,5,4],[4,1,3],[-2,-3,-1],[6,4,5],[4,5,6],[6,3,4],[5,4,3]] # Test case. Remove in final program
 Test2 = []
-for i in range(len(Test)):
- Test2.append(np.array(Test[i]))
-print(MonteCarlo([[0,1,4,5],[2,3,6,7]], Test2, 10000, 0.6)) 
+for i in range(20):
+ Test2.append(np.random.rand(100))
+
+for i in range(180, 201):
+    print(i/200, MonteCarloTwistAlg([[0,1,2,3,4,5,6,7,8,9],[10,11,12,13,14,15,16,17,18,19]], Test2, 20000, 0.9, i/200, Norm2)) 
+    print(i/200, MonteCarloSwapAlg([[0,1,2,3,4,5,6,7,8,9],[10,11,12,13,14,15,16,17,18,19]], Test2,20000, i/200, Norm2))     
     
