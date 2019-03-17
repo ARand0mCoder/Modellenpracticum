@@ -33,7 +33,7 @@ with open(path) as csv_file:
             for elem in row[2:]:
                 temp_line.append(float(elem))
             if row[1] == previousTime: # Same time occured one before
-                power[len(power)-1] = np.divide(power[len(power)-1] + temp_line,2)
+                power[len(power)-1] = np.divide([power[len(power)-1][i]+temp_line[i] for i in range(len(temp_line))],2)
             else:
                 power.append(temp_line)
                 time.append(parser.parse(row[0]+' '+row[1], dayfirst=isDayFirst))
