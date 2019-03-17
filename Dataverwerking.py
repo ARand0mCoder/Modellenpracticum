@@ -79,7 +79,7 @@ power = np.transpose(power)
 
 # This function is used for manually trimming the data and gives the user the
 # ability to agree on the trimmed data. 
-def manual_trim():
+def manual_trim(power):
     # time_factor must be 1 if the data is per 15 mins, 3 if it is per 5 mins
     time_factor = 1
     rows_to_trim = []
@@ -112,8 +112,7 @@ def manual_trim():
                 suggested_row = np.append(suggested_row, row[96 * time_factor * i : 96 * time_factor * (i + 1)])
                 suggested_days.append(i)
             else:
-                NaNs = np.empty((96 * time_factor,))
-                NaNs[:] = np.nan 
+                NaNs = np.zeros(96 * time_factor) 
                 suggested_row = np.append(suggested_row, NaNs)
             i += 1
         
@@ -130,11 +129,10 @@ def manual_trim():
 
 # This reads a txt file with the data on which rows to trim and returns the 
 # trimmed data
-def auto_trim():
+def auto_trim(power, rows_to_trim):
     # time_factor must be 1 if the data is per 15 mins, 3 if it is per 5 mins
     time_factor = 1
     suggested_power = []
-    rows_to_trim = [0, 1, 2, 3, 4, 5, 8, 9]
     current_row = 0
     
     # For each dataset of one group we check if there are any outliers
@@ -162,8 +160,7 @@ def auto_trim():
                     suggested_row = np.append(suggested_row, row[96 * time_factor * i : 96 * time_factor * (i + 1)])
                     suggested_days.append(i)
                 else:
-                    NaNs = np.empty((96 * time_factor,))
-                    NaNs[:] = np.nan 
+                    NaNs = np.zeros(96 * time_factor) 
                     suggested_row = np.append(suggested_row, NaNs)
                 i += 1
             suggested_power.append(suggested_row)
