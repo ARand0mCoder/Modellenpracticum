@@ -72,11 +72,6 @@ def plot_specific_time():
 
 #%%
 
-power = np.array(power)
-power = np.transpose(power)
-
-#%%
-
 # This function is used for manually trimming the data and gives the user the
 # ability to agree on the trimmed data. 
 def manual_trim(power):
