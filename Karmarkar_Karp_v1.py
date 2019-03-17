@@ -1,4 +1,4 @@
-##Karmarkar-Karp with fixed norm (i.e. norm is not updated! K-K with updating norm will (hopefully) follow soon)
+##Karmarkar-Karp   #Still seems to be a lot worse than greedy algorithm
 def Norm(array): #Choose your own norm. Average of the highest n is also possible
     # Make sure that Norm greater or equal to 0
     return np.amax(np.abs(array))
@@ -15,7 +15,8 @@ def Karmarkar_Karp(power): #only for m=2
     for i in range(len(data[0])-1):
         data[0],data[1] = zip(*sorted(zip(data[0],data[1])))
         data = [np.array(data[0]),np.array(data[1])]
-        data[0][-1] = data[0][-1] - data[0][-2]
+        data[0][-1] = Norm(power[1][-1] - data[1][-2]) #update norm
+        #data[0][-1] = data[0][-1] - data[0][-2]    #don't update norm
         data[0][-2] = 0
         connectlines[i].append(data[1][-1])
         connectlines[i].append(data[1][-2])
@@ -41,6 +42,14 @@ def Karmarkar_Karp(power): #only for m=2
                     connectlines.remove(elem2)
                     station1 = np.hstack(station1)
                     
-    print(station1)
-    print(station2)
+    return(station1,station2)
+    
+station1, station2 = Karmarkar_Karp(power)  #find the actual max
+powerstation1, powerstation2 = np.zeros(len(power[0])), np.zeros(len(power[0]))
+for i in station1:
+    powerstation1 += power[int(i)]
+print(max(powerstation1))
+for i in station2:
+    powerstation2 += power[int(i)]
+print(max(powerstation2))
     
