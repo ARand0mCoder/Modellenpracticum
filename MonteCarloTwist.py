@@ -49,15 +49,9 @@ def MonteCarloTwistAlg(algoSol, Data, Iterations, prob, RejectionRate, Norm):
             # take the new solution when the norm is smaller
             currentSol = newSol[:]
             currentNorm = newNorm
-        elif newNorm == currentNorm:   
-            # 50/50 change to change if the norms coincide
-            if random.randrange(2) == 0:
-                currentSol = newSol[:]
-                currentNorm = newNorm
-        else:  
-            if random.random() > RejectionRate:
-                currentSol = newSol[:]
-                currentNorm = newNorm
+        elif random.random() < (float(currentNorm) / float(newNorm))**RejectionRate:
+            currentSol = newSol[:]
+            currentNorm = newNorm
     return currentNorm, currentSol #, oldSol, oldNorm
         
 def MonteCarloSwap(groups):
@@ -92,16 +86,7 @@ def MonteCarloSwapAlg(algoSol, Data, Iterations, RejectionRate, Norm):
             currentSol = newSol[:]
             currentNorm = newNorm
         else:  
-            if random.random() > RejectionRate:
+            if random.random() < (float(currentNorm) / float(newNorm))**RejectionRate:
                 currentSol = newSol[:]
                 currentNorm = newNorm
     return currentNorm, currentSol  #, oldSol, oldNorm
-    
-Test2 = []
-for i in range(20):
- Test2.append(np.random.rand(100))
-
-for i in range(180, 201):
-    print(i/200, MonteCarloTwistAlg([[0,1,2,3,4,5,6,7,8,9],[10,11,12,13,14,15,16,17,18,19]], Test2, 20000, 0.9, i/200, Norm2)) 
-    print(i/200, MonteCarloSwapAlg([[0,1,2,3,4,5,6,7,8,9],[10,11,12,13,14,15,16,17,18,19]], Test2,20000, i/200, Norm2))     
-    
