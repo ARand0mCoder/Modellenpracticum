@@ -1,8 +1,6 @@
 import numpy as np
 import random
 
-def Norm2(array): #Calculates the norm of an array (globally defined)
-    return np.amax(np.abs(array))   
     
 def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     AllNorms = []
@@ -17,7 +15,8 @@ def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solutio
 def MonteCarloTwist(groups, prob):  #groups given as indices of the stations
     m = len(groups)
     NewDist = [[] for i in range(m)];
-    for group in range(m):
+    for grp in range(m):
+        group = grp[:]
         for station in groups[group]:
             RandomNum = random.random() #probababilty prob it stays in the same box, probability (1-p)/(m-1) it goes to another box
             if RandomNum < prob: 
@@ -60,11 +59,12 @@ def MonteCarloSwap(groups):
     item1 = items[0]
     item2 = items[1]
     newgroups = []
-    for group in groups:
+    for grp in groups:
+        group = grp[:]
         if item1 in group and not item2 in group:
             group.remove(item1)
             group.append(item2)
-        if item2 in group and not item1 in group:
+        elif item2 in group and not item1 in group:
             group.remove(item2)
             group.append(item1)
         newgroups.append(group)
