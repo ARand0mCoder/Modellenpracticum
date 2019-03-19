@@ -1,16 +1,8 @@
 import numpy as np
 
-Test = [[2,5],[3,5],[4,1],[-2,-3],[6,4]] # Test case. Remove in final program
-Test2 = []
-for i in range(len(Test)):
- Test2.append(np.array(Test[i]))
-# run test case as "print(FirstAlgorithm(Test2,2))"
+#%%
 
-def Norm(array): #Choose your own norm. Average of the highest n is also possible
-    # Make sure that Norm greater or equal to 0
-    return np.amax(np.abs(array))
-
-def FirstAlgorithm(data, m):
+def FirstAlgorithm(data, m, Norm):
     # data is the measurements of the power at ceratain times
     # m is number of components (assume it to be at least 2 (but still small))
     
