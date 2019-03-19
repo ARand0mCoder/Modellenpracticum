@@ -6,48 +6,49 @@ from dateutil import parser
 
 #%%
 
-path = r'C:\Users\dion\Documents\Studie\Modellenpracticum\Uilenburg_1_2018_clean.csv'
-time = []               # Time and day
-power = []              # Data of power from excel
-isDayFirst = False      # Used for date parsing
-checkDate = True        # When to stop checking date parsing
-previousTime = ''       # For checking double time values
-
-with open(path) as csv_file:
-    csv_reader = csv.reader(csv_file,delimiter=';') # Read excel file as .csv
-    line_count = 0
-    for row in csv_reader:
-        if line_count == 0:
-            columns = row[2:]   # Names of the columns of power
-            print(f'Kolommen zijn: {", ".join(columns)}')
-            print('\nAan het inlezen...')
-        else:
-            # Checking if date is given by month-day or day-month
-            if checkDate and row[0][0:3] == '1-2':
-                checkDate = False
-            elif checkDate and row[0][0:3] == '2-1':
-                checkDate = False
-                isDayFirst = True
-            # Stores power data
-            temp_line = []
-            for elem in row[2:]:
-                temp_line.append(float(elem))
-            if row[1] == previousTime: # Same time occured one before
-                power[len(power)-1] = np.divide([power[len(power)-1][i]+temp_line[i] for i in range(len(temp_line))],2)
+def read_data(path):
+    time = []               # Time and day
+    power = []              # Data of power from excel
+    isDayFirst = False      # Used for date parsing
+    checkDate = True        # When to stop checking date parsing
+    previousTime = ''       # For checking double time values
+    
+    with open(path) as csv_file:
+        csv_reader = csv.reader(csv_file,delimiter=';') # Read excel file as .csv
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                columns = row[2:]   # Names of the columns of power
+                print(f'Kolommen zijn: {", ".join(columns)}')
+                print('\nAan het inlezen...')
             else:
-                power.append(temp_line)
-                time.append(parser.parse(row[0]+' '+row[1], dayfirst=isDayFirst))
-            previousTime = row[1]
-        if line_count % 10000 == 0:  # Prints progress
-            print(line_count)
-        line_count += 1
-    print(f'Well, that was easy. Totaal {line_count} regels ingelezen.')
+                # Checking if date is given by month-day or day-month
+                if checkDate and row[0][0:3] == '1-2':
+                    checkDate = False
+                elif checkDate and row[0][0:3] == '2-1':
+                    checkDate = False
+                    isDayFirst = True
+                # Stores power data
+                temp_line = []
+                for elem in row[2:]:
+                    temp_line.append(float(elem))
+                if row[1] == previousTime: # Same time occured one before
+                    power[len(power)-1] = np.divide([power[len(power)-1][i]+temp_line[i] for i in range(len(temp_line))],2)
+                else:
+                    power.append(temp_line)
+                    time.append(parser.parse(row[0]+' '+row[1], dayfirst=isDayFirst))
+                previousTime = row[1]
+            if line_count % 10000 == 0:  # Prints progress
+                print(line_count)
+            line_count += 1
+        print(f'Well, that was easy. Totaal {line_count} regels ingelezen.')
+    return power, time
 
 #%%
                   
 ''' All data throughout the year '''
-def plot_data():
-    for i in range(len(row)-2):
+def plot_data(power, time):
+    for i in range(len(power[0])-2):
         # plt.figure()
         data = [line[i] for line in power]
         plt.plot(time,data)
@@ -56,11 +57,11 @@ def plot_data():
 #%%                  
                   
 ''' One specific time throughout the year '''
-def plot_specific_time():
+def plot_specific_time(power, time):
     data = []
     timeData = datetime.time(12,0)
 
-    for j in range(len(row)-2):
+    for j in range(len(power[0])-2):
         Xdata = []
         Ydata = []
         for i in range(len(power)):
@@ -69,6 +70,7 @@ def plot_specific_time():
                 Ydata.append(power[i][j])
         plt.plot(Xdata,Ydata)
     plt.show()
+
 
 #%%
 
@@ -165,6 +167,7 @@ def auto_trim(power, rows_to_trim):
         current_row += 1
     
     return suggested_power
+
 
 
 
