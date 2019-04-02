@@ -19,8 +19,8 @@ def read_data(path):
         for row in csv_reader:
             if line_count == 0:
                 columns = row[2:]   # Names of the columns of power
-                print(f'Kolommen zijn: {", ".join(columns)}')
-                print('\nAan het inlezen...')
+                print(f'Columns: {", ".join(columns)}')
+                print('\nProcessing...')
             else:
                 # Checking if date is given by month-day or day-month
                 if checkDate and row[0][0:3] == '1-2':
@@ -41,7 +41,7 @@ def read_data(path):
             if line_count % 10000 == 0:  # Prints progress
                 print(line_count)
             line_count += 1
-        print(f'Well, that was easy. Totaal {line_count} regels ingelezen.')
+        print(f'Processed {line_count} lines.')
     return power, time
 
 #%%
