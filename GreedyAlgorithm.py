@@ -8,23 +8,6 @@ def Norm1(array): #Choose your own norm. Average of the highest n is also possib
 def Norm2(array):
     return np.amax(np.abs(array))
     
-def Norm3(array):
-    aamax = np.amax(array)
-    aamin = np.amin(array)
-    if abs(aamax) > abs(aamin):
-        return aamax
-    else:
-        return aamin
-        
-def NormDistr(data, Distr, Norm):
-    newNorms = []
-    for j in range(len(Distr)):
-        sumarray = np.zeros(len(data[0]))
-        for k in Distr[j]:
-            sumarray += data[k]
-        newNorms.append(Norm(sumarray))
-    return max(newNorms)
-    
 def FirstAlgorithm(data, m, Norm):
     # data is the measurements of the power at ceratain times
     # m is number of components (assume it to be at least 2 (but still small))
@@ -118,49 +101,3 @@ def SecondAlgorithm(data, m, Norm):
             PotAddNorms[j][BestTransformator] = Norm(PotAdd[j][BestTransformator])
             
     return FinalDistribution
-    
-sab,sac,sbc,sba,sca,scb,sa,sb,sc = 0,0,0,0,0,0,0,0,0
-m = 2 # number of transformators
-for i in range(1000): # number of iterations
-    Test2 = []
-    for j in range(20): # number of groups to distribute
-        Test2.append(4 * np.random.rand(100) - np.random.rand(100)) # change the lenght of the arrays or their distribution
-    # Test2[0] = -2*Test2[0] # This can change individual values to add "solar parks"
-    
-    a = FirstAlgorithm(Test2, m ,Norm2)
-    b = SecondAlgorithm(Test2, m, Norm1)
-    c = SecondAlgorithm(Test2, m, Norm3)
-    if a != b or a!=c or b!=c:
-        Norma = NormDistr(Test2, a, Norm3)
-        Normb = NormDistr(Test2, b, Norm3)
-        Normc = NormDistr(Test2, c, Norm3)
-        if Norma > Normb:
-            sab+=1
-            if Norma > Normc:
-                sa+=1
-        elif Normb > Norma:
-            if Normb > Normc:
-                sb+=1
-            sba+=1
-            
-        if Norma > Normc:
-            sac+=1
-        elif Normc > Norma:
-            if Normc > Normb:
-                sc+=1
-            sca+=1
-            
-        if Normb > Normc:
-            sbc+=1
-        elif Normc > Normb:
-            scb+=1        
-        #print(Norma,Normb,Normc)
-        
-print(sab,sba, "First to Second with max norm")
-print(sac,sca,"First to Second with sign abs max norm")
-print(sbc,scb, "Second max norm vs sign abs max norm")
-print(sa, "times the first algorithm is alone the best")
-print(sb, "times the second algorithm with max norm is alone the best")
-print(sc, "times the second algorithm with sign abs max norm is alone the best")
-
-
