@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+import Dataverwerking as Dv
+
+def generate_data(power,time,time_factor):
+    """
+     INPUTS: power, time for last year
+     OUTPUTS: powerNew generated pseudorandomly from power
+     Assumptions: no leap year, weekdays and weekends the same as last year
+     Generating new data:
+      - Weekdays chosen from weekdays from last year from 2 weeks before to 2 weeks after same datetime
+      - Same holds for weekends
+      - Power each data is lowered or increased based on a normal distribution with mean
+    """
+    totalTime = len(power)
+    totalGroups = len(power[0])
+    powerNew = np.zeros((totalTime,totalGroups))
+    for group in range(totalGroups):
+        powerGroupNew = np.array([])
+        for day in range(365): # Does not account for leap years
+            if True: #weekdays
+                a=0
+            if True: #weekends
+                a=0
+
+            # Completely random
+            randomDay = random.randint(0,364)
+            powerDay = power[randomDay*24*60//timeDiff:(randomDay+1)*24*60//timeDiff,group]
+            # Normal
+            # powerDay = power[day*24*60//timeDiff:(day+1)*24*60//timeDiff,group]
+
+            #lower/increase w/ normal distribution
+            powerGroupNew = np.append(powerGroupNew,powerDay)
+        powerNew[:,group] = powerGroupNew
+
+    return powerNew
+
+path = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Bestanden Alliander\Power Data\Uilenburg_2_2018_clean.csv'
+# rows_to_trim1 = [0, 2, 3, 4, 7]
+
+power,time,timeDiff = Dv.read_data(path)
+print(len(power))
+# power = Dv.auto_trim(power, rows_to_trim1, timeDiff)
+powerNew = generate_data(np.array(power),time,timeDiff)
+Dv.plot_data(powerNew,time)
