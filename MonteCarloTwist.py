@@ -15,8 +15,7 @@ def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solutio
 def MonteCarloTwist(groups, prob):  #groups given as indices of the stations
     m = len(groups)
     NewDist = [[] for i in range(m)];
-    for grp in range(m):
-        group = grp[:]
+    for group in range(m):
         for station in groups[group]:
             RandomNum = random.random() #probababilty prob it stays in the same box, probability (1-p)/(m-1) it goes to another box
             if RandomNum < prob: 
