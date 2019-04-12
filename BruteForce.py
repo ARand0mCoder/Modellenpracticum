@@ -1,31 +1,35 @@
-#import time
+import time
 import numpy as np
 from itertools import chain,combinations
 
-def powersetcompl(iterable):
+def powersetcompl(iterable, maxgroupsize):
     s = list(iterable)
-    return chain.from_iterable(combinations(s,r) for r in range(int(np.floor(len(s)/2))+1)) #Only generates "first half" of the power set, as the problem is symmetric
+    return chain.from_iterable(combinations(s,r) for r in range(len(s)-maxgroupsize,int(np.floor(len(s)/2))+1)) #Only generates "first half" of the power set, as the problem is symmetric
 
-def BruteForce(input, m): #input of the form [ [],[],[],  ,[] ]
-    #t0 = time.time()
+def Norm(array): 
+    return np.amax(np.abs(array))
+
+def BruteForce(input,Norm, maxgroupsize, m): #input of the form [ [],[],[],  ,[] ]
+    t0 = time.time()
     totalinput = sum(input)
-    bestmax = max(totalinput)
+    bestmax = np.amax(totalinput)
     if m == 2:
-        for elem in powersetcompl(np.arange(0,len(input))):
+        for elem in powersetcompl(np.arange(0,len(input)), maxgroupsize):
             power1 = np.zeros(len(input[0]))
             for x in elem:
                 power1 += input[x]
-            if max(power1) < bestmax: #Most time-consuming part
+            if Norm(power1) < bestmax: 
                 power2 = totalinput - power1
-                if max(power2) < bestmax: 
-                    bestmax = max(max(power1),max(power2))
+                if Norm(power2) < bestmax: 
+                    bestmax = max(np.amax(power1),np.amax(power2))
                     group1 = []
                     for x in elem:
                         group1.append(x)
                     #print(bestmax)
         group2 = np.setxor1d(np.arange(0,len(input)),group1)
-        #t1 = time.time()
-    return(group1, group2)#, t1-t0)
+        t1 = time.time()
+    return(group1, group2, t1-t0)
 
 ##
-print(BruteForce(ZZZZZ,2)) #Takes ~2.1 sec for len(input)=10
+print(BruteForce(ZZZZZ,Norm,9,2)) #Takes ~0.19 sec for len(input)=10, ~9 sec for len(input)=15, NO restriction on group size; restricting to e.g. 9 --> ~6,8 sec
+
