@@ -1,8 +1,16 @@
 import numpy as np
 import random
 
-    
-def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
+def AllowedDistr(AlgoSol, PlugsPerTrafo, PlugsPerField):
+    for Trafo in range(len(AlgoSol)):
+        SumOfPlugs = 0
+        for Field in AlgoSol[Trafo]:
+            SumOfPlugs += PlugsPerField[Field]
+        if SumOfPlugs > PlugsPerTrafo[Trafo]:
+            return False
+    return True
+
+def MNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     AllNorms = []
     
     for group in range(len(Sol)):
@@ -11,7 +19,56 @@ def MaxNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solutio
             array += Data[station]
         AllNorms.append(Norm(array))
     return max(AllNorms)
+    
+    
+def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, type, prob = 0.9):
+    
+    BestSols, BestNorms = [algoSol[:]], [MNorm(Data, algoSol, Norm)] 
+    CurrentSol, CurrentNorm = BestSols[0], BestNorms[0]
+        
+    for iteration in range(Iterations):
+        if type == "twist":
+            NewSol = MonteCarloTwist(CurrentSol, prob)
+            NewNorm = MNorm(Data, NewSol, Norm)
+        elif type == "swap":
+            NewSol = MonteCarloSwap(CurrentSol)
+            NewNorm = MNorm(Data, NewSol, Norm)
+        
+        #check if distribution is allowed
+        if AllowedDistr(NewSol, PlugsPerTrafo, PlugsPerField):
+            
+            #If among the best, add it.
+            NewSol = [sorted(array) for array in NewSol]
+            if (iteration < NumberToSave or NewNorm < BestNorms[len(BestNorms)-1]) and NewSol not in BestSols:
 
+                IsAdded = False
+                for i in range(len(BestSols)):
+                    if NewNorm < BestNorms[i]:
+                        BestNorms.insert(i, NewNorm)
+                        BestSols.insert(i, NewSol)
+                        IsAdded = True
+                        break
+                        
+                if not IsAdded:
+                    BestNorms.append(NewNorm)
+                    BestSols.append(NewSol)
+                    
+                if len(BestSols) > NumberToSave:
+                    BestSols.pop()
+                    BestNorms.pop()
+
+            #If better then current replace
+            if NewNorm < CurrentNorm:  
+                # Take the new solution when the norm is smaller
+                CurrentSol = NewSol[:]
+                CurrentNorm = NewNorm
+            elif random.random() < (float(CurrentNorm) / float(NewNorm))**RejectionRate:
+                # With a small probability continue with the new choice 
+                CurrentSol = NewSol[:]
+                CurrentNorm = NewNorm
+
+    return BestSols, BestNorms
+      
 def MonteCarloTwist(groups, prob):  #groups given as indices of the stations
     m = len(groups)
     NewDist = [[] for i in range(m)];
@@ -31,26 +88,6 @@ def MonteCarloTwist(groups, prob):  #groups given as indices of the stations
                 else:
                     NewDist[RandomNum].append(station)
     return NewDist
-
-def MonteCarloTwistAlg(algoSol, Data, Iterations, prob, RejectionRate, Norm):
-    
-    oldSol = algoSol[:]
-    oldNorm = MaxNorm(Data, oldSol, Norm)
-    currentSol = algoSol[:]
-    currentNorm = oldNorm
-
-    for iteration in range(Iterations):
-        newSol = MonteCarloTwist(currentSol, prob)
-        newNorm = MaxNorm(Data, newSol, Norm)
-        
-        if newNorm < currentNorm:  
-            # take the new solution when the norm is smaller
-            currentSol = newSol[:]
-            currentNorm = newNorm
-        elif random.random() < (float(currentNorm) / float(newNorm))**RejectionRate:
-            currentSol = newSol[:]
-            currentNorm = newNorm
-    return currentNorm, currentSol #, oldSol, oldNorm
         
 def MonteCarloSwap(groups):
     numberofgroups = sum(len(group) for group in groups)
@@ -68,24 +105,3 @@ def MonteCarloSwap(groups):
             group.append(item1)
         newgroups.append(group)
     return newgroups
-    
-def MonteCarloSwapAlg(algoSol, Data, Iterations, RejectionRate, Norm):
-
-    oldSol = algoSol[:]
-    oldNorm = MaxNorm(Data, oldSol, Norm)
-    currentSol = algoSol[:]
-    currentNorm = oldNorm
-
-    for iteration in range(Iterations):
-        newSol = MonteCarloSwap(currentSol)
-        newNorm = MaxNorm(Data, newSol, Norm)
-        
-        if newNorm < currentNorm:  
-            # take the new solution when the norm is smaller
-            currentSol = newSol[:]
-            currentNorm = newNorm
-        else:  
-            if random.random() < (float(currentNorm) / float(newNorm))**RejectionRate:
-                currentSol = newSol[:]
-                currentNorm = newNorm
-    return currentNorm, currentSol  #, oldSol, oldNorm
