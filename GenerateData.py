@@ -37,7 +37,11 @@ def generate_data(power,time,time_factor):
             # powerDay = power[day*24*60//timeDiff:(day+1)*24*60//timeDiff,group]
 
             ''' Decrease/increase with normal distribution '''
-            powerDay += random.normalvariate(np.mean(powerDay),np.mean(powerDay)/15)-np.mean(powerDay)
+            dayAverage = np.mean(powerDay)
+            powerDay += random.normalvariate(dayAverage,dayAverage/15)-dayAverage
+            if day % 14 == 0:
+                weekRandom = random.normalvariate(dayAverage,dayAverage/10)-dayAverage
+            powerDay += weekRandom
 
             powerGroupNew = np.append(powerGroupNew,powerDay)
         powerNew[:,group] = powerGroupNew
@@ -55,17 +59,20 @@ def weekDayOrEnd(weekday,currentDate,timeDiff):
             break
     return randomDay
 
-path = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Bestanden Alliander\Power Data\Uilenburg_2_2018_clean.csv'
-# rows_to_trim1 = [0, 1, 2, 3, 4, 5, 8, 9]
 
-power,time,timeDiff = Dv.read_data(path)
-# print(len(power))
-# Dv.plot_data(power,time)
 
-# powerTranspose = np.transpose(np.array(power))
-# power = Dv.auto_trim(powerTranspose, rows_to_trim1, timeDiff)
-# print(len(power[0]))
-# Dv.plot_data(power,time)
+# path = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Bestanden Alliander\Power Data\Uilenburg_1_2018_clean.csv'
+# # rows_to_trim1 = [0, 1, 2, 3, 4, 5, 8, 9]
+#
+# power,time,timeDiff = Dv.read_data(path)
+# # print(len(power))
+# # Dv.plot_data(power,time)
+#
+# # powerTranspose = np.transpose(np.array(power))
+# # power = Dv.auto_trim(powerTranspose, rows_to_trim1, timeDiff)
+# # print(len(power[0]))
+# # Dv.plot_data(power,time)
+#
+# powerNew = generate_data(np.array(power),time,timeDiff)
+# Dv.plot_data(powerNew,time)
 
-powerNew = generate_data(np.array(power),time,timeDiff)
-Dv.plot_data(powerNew,time)
