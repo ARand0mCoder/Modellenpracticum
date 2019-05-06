@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import csv
 import datetime
 from dateutil import parser
-import DataProcessing as dp
+import DataProcessing as dpr
 
 #%%
 
@@ -184,4 +184,4 @@ def grab_year(power,time,year):
 # time = date_linspace(datetime.datetime(2016,1,1,0,0),datetime.datetime(2019,1,1,0,0),datetime.timedelta(minutes=5))
 # power = np.load(r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Power npy\metingen_Winselingseweg.npy')
 # power,time = grab_year(power,time,2016)
-# dp.plot_data(power,time)
+# dpr.plot_data(power,time)
