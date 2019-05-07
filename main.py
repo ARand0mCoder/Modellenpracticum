@@ -1,14 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import datetime
 
 # Enter directory of you files here, so that python knows where to look
-file_dir = r'C:\Users\dion\Documents\Studie\Modellenpracticum'
+file_dir = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum'
 sys.path.append(file_dir)
 
-import Dataverwerking as Dv
+import DataProcessing as dpr
+import DataParsing as dpa
+import GenerateData as gd
 import GreedyAlgorithm as GA
-import Karmarkar_karp_v1 as kkk
+import Karmarkar_Karp_v1 as kkk
 import MonteCarloTwist as MCT
 
 #%%
@@ -26,7 +29,7 @@ def Highest_k_pow_Norm(p, k, array):
 def Norm1(array): #Choose your own norm. Average of the highest n is also possible
     # Make sure that Norm greater or equal to 0
     return np.amax(array)
-    
+
 def Norm2(array):
     return np.amax(np.abs(array))
 
@@ -40,28 +43,32 @@ def Norm3(array):
 
 #%%
 
-
-path1 = r'C:\Users\dion\Documents\Studie\Modellenpracticum\Data\Uilenburg_1_2018_clean.csv'
-path2 = r'C:\Users\dion\Documents\Studie\Modellenpracticum\Data\Uilenburg_2_2018_clean.csv'
+path1 = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Power npy\metingen_Uilenburg.npy'
+path2 = r'C:\Users\XpsBook\Documents\Radboud Universiteit Nijmegen\Jaar 3\Modellenpracticum\Bestanden Alliander\Power Data\Uilenburg_2_2018_clean.csv'
 
 rows_to_trim1 = [0, 1, 2, 3, 4, 5, 8, 9]
 rows_to_trim2 = [0, 2, 3, 4, 7]
 
-power1, time1, time_diff1 = Dv.read_data(path1)
-power2, time2, time_diff2 = Dv.read_data(path2)
+if 'metingen_' not in path1:
+    power1, time1, time_diff1 = dpa.read_data(path1)
+    power2, time2, time_diff2 = dpa.read_data(path2)
 
-power1 = np.transpose(np.array(power1))
-power2 = np.transpose(np.array(power2))
+    power1 = np.transpose(np.array(power1))
+    power2 = np.transpose(np.array(power2))
 
-power1 = Dv.auto_trim(power1, rows_to_trim1, time_diff1)
-power2 = Dv.auto_trim(power2, rows_to_trim2, time_diff2)
-#%%
-power = []
-for row in power1:
-    power.append(row[0:34944])
-for row in power2:
-    power.append(row[0:34944])
-
+    power1 = dpr.auto_trim(power1, rows_to_trim1, time_diff1)
+    power2 = dpr.auto_trim(power2, rows_to_trim2, time_diff2)
+    #%%
+    power = []
+    for row in power1:
+        power.append(row[0:34944])
+    for row in power2:
+        power.append(row[0:34944])
+else:
+    time = dpa.date_linspace(datetime.datetime(2016,1,1,0,0),datetime.datetime(2019,1,1,0,0),datetime.timedelta(minutes=5))
+    power = np.load(path1)
+    power,time = dpa.grab_year(power,time,2016)
+    power = np.transpose(np.array(power))
 #%%
 
 def plot_solution(power, sol, m):
@@ -100,7 +107,5 @@ def solve2(power, Norm):
 
 '''
 Data 'bootstrappen'
-
 '''
-
-
+solve(power,MaxNorm)
