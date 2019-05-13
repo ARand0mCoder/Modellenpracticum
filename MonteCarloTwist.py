@@ -9,6 +9,14 @@ def AllowedDistr(AlgoSol, PlugsPerTrafo, PlugsPerField):
         if SumOfPlugs > PlugsPerTrafo[Trafo]:
             return False
     return True
+    
+def DistanceFromOldSol(OldSol, NewSol):
+    NotTheSame = 0
+    for Trafo in range(len(OldSol)):
+        for i in OldSol[Trafo]:
+            if i not in NewSol[Trafo]:
+                NotTheSame += 1
+    return NotTheSame
 
 def MNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     AllNorms = []
@@ -21,21 +29,25 @@ def MNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     return max(AllNorms)
     
     
-def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, type, prob = 0.9):
+def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, type, Penalty, prob = 0.8):
     
     BestSols, BestNorms = [algoSol[:]], [MNorm(Data, algoSol, Norm)] 
     CurrentSol, CurrentNorm = BestSols[0], BestNorms[0]
         
     for iteration in range(Iterations):
+        
         if type == "twist":
             NewSol = MonteCarloTwist(CurrentSol, prob)
-            NewNorm = MNorm(Data, NewSol, Norm)
-        elif type == "swap":
+        else:
             NewSol = MonteCarloSwap(CurrentSol)
-            NewNorm = MNorm(Data, NewSol, Norm)
+            
+        NewNorm = MNorm(Data, NewSol, Norm)
         
+        Distance = DistanceFromOldSol(algoSol, NewSol)
+
         #check if distribution is allowed
-        if AllowedDistr(NewSol, PlugsPerTrafo, PlugsPerField):
+        if AllowedDistr(NewSol, PlugsPerTrafo, PlugsPerField) and Distance < len(Penalty):
+            NewNorm += Penalty[Distance]
             
             #If among the best, add it.
             NewSol = [sorted(array) for array in NewSol]
