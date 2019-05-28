@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 def AllowedDistr(AlgoSol, PlugsPerTrafo, PlugsPerField):
     for Trafo in range(len(AlgoSol)):
@@ -29,7 +30,7 @@ def MNorm(Data, Sol, Norm): # Calculates the maximum of the norms of a solution
     return max(AllNorms)
     
     
-def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, type, Penalty, prob = 0.8):
+def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, type, Penalty = [0 for i in range(0, 1000)], prob = 0.8):
     
     BestSols, BestNorms = [algoSol[:]], [MNorm(Data, algoSol, Norm)] 
     CurrentSol, CurrentNorm = BestSols[0], BestNorms[0]
@@ -117,3 +118,16 @@ def MonteCarloSwap(groups):
             group.append(item1)
         newgroups.append(group)
     return newgroups
+    
+def DrawDistanceFunction(Solutions):
+    NumOfTraf = len(Solutions[1])
+    NumOfGroups = sum([len(Solutions[1][i]) for i in range(0, NumOfTraf)])
+    AllDist = [0 for i in range(1, 2*NumOfGroups)]
+    for i in range(0, len(Solutions)):
+        for j in range(i + 1, len(Solutions)):
+            AllDist[DistanceFromOldSol(Solutions[i], Solutions[j])] += 1
+    print(AllDist)
+    AllDist = np.array(AllDist)
+    print(AllDist)
+    plt.bar([i for i in range(1, 2*NumOfGroups)], AllDist)
+    plt.show()
