@@ -3,7 +3,45 @@ import itertools
 
 #%%
 
+'''
+--------- CONTENT ---------
+The code in this file can be used for performing a limited brute force. An 
+initial distribution can be specified, together with a maximum number of 
+allowed changes. Every configuration that is at most the specified number of 
+changes away from the initial distribution is tested for its norm, and the 
+distribution with the lowest norm is returned. It is possible to specify 
+a penalty for each number of changes, if one prefers to get results with a 
+lower amount of changes.
+
+This only works if the initial distribution consists of 2 groups.
+INPUTS for k_step_brute_force:
+    - data: the input data
+    - k: The maximum number of allowed changes.
+    - initial_distribution
+    - norm: the desired norm function to be used
+    - capacities: The maximal capacity of each trafo
+    - weights: The weights of each group
+    - penalties: The penalty for each change weight. So penalties[i] gives the
+                 extra cost that should be added to the norm for i changes from
+                 the initial distribution.
+OUTPUT: The best distribution.
+
+The helper functions are norm_from_dist, k_step_perms and change_weights.
+The norm_from_dist function calculates the norm that is associated with a 
+specific distribution. It can also take care of different capacities of the 
+groups.
+
+The k_step_perms function returns all the distributions that are at distance 
+at most k from the initial distribution. It uses the yield statement to return
+a generator instead of a list in order to save memory usage.
+
+The change_weights calculates the distance from a given distribution to the
+initial distribution, and this uses the weights.
+----------------------------
+'''
+
 def norm_from_dist(power, dist, norm, capacities):
+    # Calculate the norm (weighted by capacity) of a given distribution
     tot1 = np.zeros(len(power[0]))
     tot2 = np.zeros(len(power[0]))
     for i in dist[0]:
@@ -14,14 +52,19 @@ def norm_from_dist(power, dist, norm, capacities):
 
 
 def k_step_perms(init_dist, k):
-    # Currently only works for len(init_dist) == 2
+    # Gives all permutations at distance at most k from init_dist
     T1 = init_dist[0]
     T2 = init_dist[1]
+    
+    # For each allowed distance i, take all subsets comb1 of size i in T1, and 
+    # take all subsets comb2 of size i in T2, and then change them. The resulting
+    # distributions are then res1 and res2, which are returned.
     for i in range(1, k + 1):
         for comb1 in itertools.combinations(T1, i):
             for comb2 in itertools.combinations(T2, i):
                 res1 = []
                 res2 = []
+                # Move everything from comb1 to res2, and everything else to res1
                 for j in T1:
                     if j not in comb1:
                         res1.append(j)
@@ -31,29 +74,38 @@ def k_step_perms(init_dist, k):
                 res1.extend(comb2)
                 res2.extend(comb1)
                 yield [res1, res2], [comb1, comb2]
-    
-    
+
+
 def change_weight(changes, weights):
-    maximum = 0
+    # For a list of weights and the list of changes (this list contains of two
+    # lists, one which gives the numbers going from T1 to T2, and another giving
+    # the numbers going from T2 to T1), calculate the weight of this change.
+    total = 0
     for change in changes:
-        tot = 0
+        change_tot = 0
         for c in change:
-            tot += weights[c]
-        if tot > maximum:
-            maximum = tot
-    return maximum
+            # The weights list defines how big every change is.
+            change_tot += weights[c]
+        total += change_tot
+    return int(total)
     
 
-def k_step_brute_force(data, k, initial_distribution, norm, capacities, weights):
+def k_step_brute_force(data, k, initial_distribution, norm, capacities, weights, penalties = [0 for i in range(1000)]):
     possible_dists = k_step_perms(initial_distribution, k)
     best_norm = norm_from_dist(data, initial_distribution, norm, capacities)
     best_dist = []
+    
+    # Try all distributions and calculate their norms. Return the distribution
+    # with the lowest norm. 
     for dist, changes in possible_dists:
         # A distribution is only allowed if the changes in comb move less than 
         # the maximum number of allowed changes, even with weigths applies
-        if change_weight(changes, weights) <= k:
-            cur_norm = norm_from_dist(data, dist, norm, capacities)
+        weight = change_weight(changes, weights)
+        if weight <= 2*k:
+            cur_norm = norm_from_dist(data, dist, norm, capacities) + penalties[weight]
+            
             if cur_norm < best_norm:
                 best_dist = dist
                 best_norm = cur_norm
+    
     return best_dist
