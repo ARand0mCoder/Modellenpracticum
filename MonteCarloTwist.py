@@ -79,7 +79,7 @@ def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, Rejectio
         # Norm of the new solution.
         NewNorm = MNorm(Data, NewSol, Norm)
         
-        Distance = DistanceFromOldSol(algoSol, NewSol)
+        Distance = DistanceFromOldSol(algoSol, NewSol, PlugsPerField)
 
         #Check if distribution is allowed
         if AllowedDistr(NewSol, PlugsPerTrafo, PlugsPerField) and Distance < len(Penalty):
