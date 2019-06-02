@@ -38,3 +38,6 @@ def DrawDistanceFunction(Solutions):
     plt.bar([i for i in range(1, 2*NumOfGroups)], AllDist)
     plt.show()
    
+def PlotAllSolutions(Result):
+    plt.plot(Result, "ro")
+    plt.show()
