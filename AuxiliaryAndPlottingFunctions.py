@@ -5,12 +5,15 @@ This file contains:
  - a couple of functions to plot results
 Functions:
 	DistanceFromOldSol Computes the distance between two solutions.
-		Variables:	OldSol			The first solution
-					NewSol			The second solution
-					PlugsPerField	The weight of each group
+		Variables:	OldSol		The first solution
+				NewSol		The second solution
+				PlugsPerField	The weight of each group
 		
-    (??) plots the norm of multiple solutionsin a graph.
-    DrawDistanceFunction plots the distance between different solutions.
+    	PlotAllSolutions	 plots the norm of multiple solutions in a graph.
+    		Variables:	Result		All norms (sorted)
+		
+   	 DrawDistanceFunction plots the distance between different solutions.
+    		Variables:	Solutions	All solutions as arrays of arrays
 ----------------------------
 '''
 def DistanceFromOldSol(OldSol, NewSol, PlugsPerField):
