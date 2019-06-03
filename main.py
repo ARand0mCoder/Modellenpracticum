@@ -135,7 +135,7 @@ elif station == r'Rijksuniversiteit':
 time = dpa.date_linspace(datetime.datetime(2016,1,1,0,0),datetime.datetime(2019,1,1,0,0),datetime.timedelta(minutes=5))
 #power,time = dpa.grab_year(power,time,2016)
 power = np.transpose(np.array(power))
-dpr.auto_trim(power, rows_to_trim, 5)
+power = dpr.auto_trim(power, rows_to_trim, 5)
 
 #%%
 
