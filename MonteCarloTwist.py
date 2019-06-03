@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import AuxiliaryAndPlottingFunctions as Aux
 
 '''
 --------- CONTENT ---------
@@ -50,7 +51,7 @@ def AllowedDistr(AlgoSol, PlugsPerTrafo, PlugsPerField):
             return False
     return True
 
-def MNorm(Data, Sol, Norm): 
+def MNorm(Data, Sol, Norm, Capacities): 
     AllNorms = []
     for group in range(len(Sol)):
         
@@ -58,14 +59,14 @@ def MNorm(Data, Sol, Norm):
         array = np.zeros(len(Data[0]))
         for station in Sol[group]:
             array += Data[station]
-        AllNorms.append(Norm(array))
+        AllNorms.append(Norm(array)/Capacities[group])
         
     return max(AllNorms)
     
     
-def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, RejectionRate, Norm, NumberToSave, Type, Penalty = [0 for i in range(0, 1000)], prob = 0.8):
+def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Capacities, Iterations, RejectionRate, Norm, NumberToSave, Type, Penalty = [0 for i in range(0, 1000)], prob = 0.8):
     
-    BestSols, BestNorms = [algoSol[:]], [MNorm(Data, algoSol, Norm)] 
+    BestSols, BestNorms = [algoSol[:]], [MNorm(Data, algoSol, Norm, Capacities)] 
     CurrentSol, CurrentNorm = BestSols[0], BestNorms[0]
         
     for iteration in range(Iterations):
@@ -77,9 +78,9 @@ def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Iterations, Rejectio
             NewSol = MonteCarloSwap(CurrentSol)
         
         # Norm of the new solution.
-        NewNorm = MNorm(Data, NewSol, Norm)
+        NewNorm = MNorm(Data, NewSol, Norm, Capacities)
         
-        Distance = DistanceFromOldSol(algoSol, NewSol, PlugsPerField)
+        Distance = Aux.DistanceFromOldSol(algoSol, NewSol, PlugsPerField)
 
         #Check if distribution is allowed
         if AllowedDistr(NewSol, PlugsPerTrafo, PlugsPerField) and Distance < len(Penalty):
@@ -171,4 +172,3 @@ def MonteCarloSwap(groups):
             group.append(item1)
         newgroups.append(group)
     return newgroups
-   
