@@ -29,14 +29,24 @@ def DistanceFromOldSol(OldSol, NewSol, PlugsPerField):
     return TotalDistance
    
 
-def DrawDistanceFunction(Solutions):
+def DrawDistanceFunction(Solutions, weights):
     NumOfGroups = sum([len(Solutions[1][i]) for i in range(0, len(Solutions[1]))])
     AllDist = [0 for i in range(1, 2*NumOfGroups)]
 	
 	# Compute the distance for each distinct pair of groups.
     for i in range(0, len(Solutions)):
         for j in range(i + 1, len(Solutions)):
-            AllDist[DistanceFromOldSol(Solutions[i], Solutions[j])] += 1
+            AllDist[DistanceFromOldSol(Solutions[i], Solutions[j], weights)] += 1
+    
+    AllDist = np.array(AllDist)
+	
+	#Plot the solutions.
+    plt.bar([i for i in range(1, 2*NumOfGroups)], AllDist)
+    plt.show()
+    
+    AllDist = [0 for i in range(1, 2*NumOfGroups)]
+    for j in range(1, len(Solutions)):
+        AllDist[DistanceFromOldSol(Solutions[0], Solutions[j], weights)] += 1
     
     AllDist = np.array(AllDist)
 	
