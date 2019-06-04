@@ -11,6 +11,8 @@ import DataProcessing as dpr
 import DataParsing as dpa
 import GenerateData as gd
 import MonteCarloTwist as MCT
+import LimitedBruteForce as LBF
+import AuxiliaryAndPlottingFunctions as Aux
 
 #%%
 def MaxNorm(array): #Choose your own norm. Average of the highest n is also possible
@@ -38,12 +40,27 @@ def Norm3(array):
         return aamax
     else:
         return aamin
+#%%
+def plot_solution(power, sol):
+    for i in range(len(sol)):
+        tot = 0
+        for j in sol[i]:
+            tot += power[j]
+        plt.plot(tot)
+        plt.show()
 
+def sol_norms(power, sol, Norm, capacities):
+    for i in range(len(sol)):
+        group = sol[i]
+        tot = np.zeros(len(power[0]))
+        for val in group:
+            tot += power[val]
+        print(Norm(tot)/capacities[i])
 #%%
 # Capacity condition: I x Ubase x sqrt(3) < BZSV
 
 Ubase = 10500 # (V)
-station = r'Rijksuniversiteit'
+station = r'HoogteKadijk'
 
 base_path = r'C:\Users\dionl\Documents\Modellenpracticum\Power npy\metingen_'
 power_path = base_path + station + r'.npy'
@@ -154,27 +171,32 @@ elif station == r'Winselingseweg':
     weights = [5,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,4,1,1,1,2,1,2,1,1,1,1,2,1,2]
 
 
+power = np.transpose(np.array(power))
 time = dpa.date_linspace(datetime.datetime(2016,1,1,0,0),datetime.datetime(2019,1,1,0,0),datetime.timedelta(minutes=5))
 #power,time = dpa.grab_year(power,time,2016)
-power = np.transpose(np.array(power))
 power = dpr.auto_trim(power, rows_to_trim, 5)
+print("Trimmed")
+new_power = []
+min_length = len(power[0])
+for row in power:
+    if len(row) < min_length:
+        min_length = len(row)
+
+for row in power:
+    new_power.append(row[0:min_length])
+power = new_power
 
 #%%
+if False:
+    sol = LBF.k_step_brute_force(power, 3, initial, MaxNorm, BZSV, weights)
+    plot_solution(power, sol)
 
-def plot_solution(power, sol, m):
-    for i in range(m):
-        tot = 0
-        for j in sol[i]:
-            tot += power[j]
-        plt.plot(tot)
-        plt.show()
 #%%
-
-def sol_norms(power, sol, Norm):
-    for group in sol:
-        tot = np.zeros(len(power[0]))
-        for val in group:
-            tot += power[val]
-        print(Norm(tot))
-
-
+if True:
+    solutions, norms = MCT.MonteCarlo(initial, power, stekker, weights, BZSV, 50000, 10, MaxNorm, 100, "twist")
+    best_sol = solutions[0]
+    plot_solution(power, best_sol)
+    sol_norms(power, best_sol, MaxNorm, BZSV)
+    Aux.DrawDistanceFunction(solutions, weights)
+    Aux.PlotAllSolutions(norms)
+    
