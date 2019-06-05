@@ -42,6 +42,7 @@ def DrawDistanceFunction(Solutions, weights, OldSol):
     for i in range(len(AllDist)):
         if AllDist[i] >= 1:
             FurthestBar = i + 5
+	
     AllDist = AllDist[:FurthestBar-1]
     AllDist = np.array(AllDist)
 	
