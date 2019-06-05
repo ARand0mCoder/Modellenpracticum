@@ -61,7 +61,7 @@ def trimmed_row(row, avg, row_length, timeDiff, maximums):
         print(event_avgs)
         
         i = 0
-        while 24*60//timeDiff * (i + 1) < row_length:
+        while 24*60//timeDiff * (i + 1) <= row_length:
             if i not in suggested_days:
                 suggested_row = np.append(suggested_row, row[24*60//timeDiff * i : 24*60//timeDiff * (i + 1)])
             else:
