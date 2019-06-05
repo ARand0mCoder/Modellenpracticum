@@ -20,7 +20,6 @@ def generate_data(power,time,timeDiff):
     - Generate noise: Each day is lowered or increased based on a
         normal distribution as well as each 2 weeks with a larger deviation
         to account for large scale changes
-
     Most realistic for generating new data is pseudorandom + generate noise
     """
     totalTime = len(power)
@@ -36,7 +35,7 @@ def generate_data(power,time,timeDiff):
                 weekday = True
             else: # Weekends
                 weekday = False
-            randomDay = weekDayOrEnd(weekday,currentDate,timeDiff)
+            randomDay = weekDayOrEnd(weekday,currentDate,timeDiff, time)
             powerDay = power[randomDay*24*60//timeDiff:(randomDay+1)*24*60//timeDiff,group]
 
             ''' Completely random '''
@@ -58,7 +57,7 @@ def generate_data(power,time,timeDiff):
 
     return powerNew
 
-def weekDayOrEnd(weekday,currentDate,timeDiff):
+def weekDayOrEnd(weekday,currentDate,timeDiff, time):
     """ Returns a random day within 2 weeks of currentDate taking weekdays and
     weekends in consideration. The 14 day window is variable. """
     while True: # Trying to find a weekday within 2 weeks of currentDate
@@ -70,7 +69,7 @@ def weekDayOrEnd(weekday,currentDate,timeDiff):
             break
     return randomDay
 
-def smoothNoise(power,rank):
+def smoothNoise(power,rank,time):
     ''' Generates new dataset based on matrix approximations: Singular Value Decomposition (SVD)
     The higher the rank, the better the approximation of the data
     The lower the rank, the smoother the approximation of the data'''
