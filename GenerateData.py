@@ -36,7 +36,7 @@ def generate_data(power,time,timeDiff):
             else: # Weekends
                 weekday = False
             randomDay = weekDayOrEnd(weekday,currentDate,timeDiff, time)
-            powerDay = power[randomDay*24*60//timeDiff:(randomDay+1)*24*60//timeDiff,group]
+            powerDay = np.copy(power[randomDay*24*60//timeDiff:(randomDay+1)*24*60//timeDiff,group])
 
             ''' Completely random '''
             # randomDay = random.randint(0,364+int(isLeapYear))
