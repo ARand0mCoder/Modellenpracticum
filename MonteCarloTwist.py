@@ -70,7 +70,8 @@ def MonteCarlo(algoSol, Data, PlugsPerTrafo, PlugsPerField, Capacities, Iteratio
     CurrentSol, CurrentNorm = BestSols[0], BestNorms[0]
         
     for iteration in range(Iterations):
-        
+        if iteration % 1000 == 0:
+            print(iteration)
         # Calculate the new random solution.
         if Type == "twist":
             NewSol = MonteCarloTwist(CurrentSol, prob)
