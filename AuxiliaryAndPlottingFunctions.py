@@ -30,7 +30,7 @@ def DistanceFromOldSol(OldSol, NewSol, PlugsPerField):
    
 
 def DrawDistanceFunction(Solutions, weights, OldSol):
-    NumOfGroups = sum([len(Solutions[1][i]) for i in range(0, len(Solutions[1]))])
+    NumOfGroups = sum(weights)
     AllDist = [0 for i in range(1, 2*NumOfGroups)]
 	
 	# Compute the distance for each distinct pair of groups.
@@ -45,7 +45,7 @@ def DrawDistanceFunction(Solutions, weights, OldSol):
 	
     AllDist = AllDist[:FurthestBar-1]
     AllDist = np.array(AllDist)
-	
+    
 	#Plot the distance of solutions with respect to each other.
     plt.bar([i for i in range(1, FurthestBar)], AllDist)
     plt.ylabel("Aantal keer dat dit voorkomt")
@@ -61,7 +61,7 @@ def DrawDistanceFunction(Solutions, weights, OldSol):
 	#Plot the distance of solutions with respect to the old solution.
     plt.bar([i for i in range(1, FurthestBar)], AllDist)
     plt.ylabel("Aantal keer dat dit voorkomt")
-    plt.xlabel("Aantal veranderingen ten opzichte van oude oplossing")
+    plt.xlabel("Aantal veranderingen ten opzichte van huidige oplossing")
     plt.show()
     
     AllDist = [0 for i in range(1, FurthestBar)]
@@ -77,7 +77,7 @@ def DrawDistanceFunction(Solutions, weights, OldSol):
     plt.show()
    
 def PlotAllSolutions(Result):
-    plt.ylabel("Max Norm")
+    plt.ylabel("Max Norm (%)")
     plt.xlabel("Beste oplossing")
     plt.plot(Result, "ro")
     plt.show()
