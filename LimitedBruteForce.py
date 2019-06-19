@@ -93,9 +93,15 @@ def change_weight(changes, weights):
     
 
 def k_step_brute_force(data, k, initial_distribution, max_stekkers, norm, capacities, weights, penalties = [0 for i in range(1000)]):
+    # The k_step_perms only gives changes where from both groups the same amount
+    # is taken. Sometimes it may be needed to move more from one group than from
+    # the other, so we add some extra rows that do not matter.
     new_initial = initial_distribution.copy()
     total_groups = len(initial_distribution[0]) + len(initial_distribution[1])
     for i in range(2):
+        # Make sure that we do not add too much.
+        if max_stekkers[i] - len(new_initial[i]) > k:
+            max_stekkers[i] = len(new_initial[i]) + k
         while len(new_initial[i]) < max_stekkers[i]:
             new_initial[i].append(total_groups)
             total_groups += 1
@@ -120,4 +126,3 @@ def k_step_brute_force(data, k, initial_distribution, max_stekkers, norm, capaci
                 best_norm = cur_norm
     
     return best_dist
-
