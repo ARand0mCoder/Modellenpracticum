@@ -18,6 +18,8 @@ INPUTS for k_step_brute_force:
     - data: the input data
     - k: The maximum number of allowed changes.
     - initial_distribution
+    - max_stekkers: The maximal amount of stekkers that can be connected to each
+                trafo in the initial distribution.
     - norm: the desired norm function to be used
     - capacities: The maximal capacity of each trafo
     - weights: The weights of each group
@@ -90,9 +92,18 @@ def change_weight(changes, weights):
     return int(total)
     
 
-def k_step_brute_force(data, k, initial_distribution, norm, capacities, weights, penalties = [0 for i in range(1000)]):
-    possible_dists = k_step_perms(initial_distribution, k)
-    best_norm = norm_from_dist(data, initial_distribution, norm, capacities)
+def k_step_brute_force(data, k, initial_distribution, max_stekkers, norm, capacities, weights, penalties = [0 for i in range(1000)]):
+    new_initial = initial_distribution.copy()
+    total_groups = len(initial_distribution[0]) + len(initial_distribution[1])
+    for i in range(2):
+        while len(new_initial[i]) < max_stekkers[i]:
+            new_initial[i].append(total_groups)
+            total_groups += 1
+            data.append(np.zeros(len(data[0])))
+            weights.append(0)
+    
+    possible_dists = k_step_perms(new_initial, k)
+    best_norm = norm_from_dist(data, new_initial, norm, capacities)
     best_dist = []
     
     # Try all distributions and calculate their norms. Return the distribution
@@ -101,7 +112,7 @@ def k_step_brute_force(data, k, initial_distribution, norm, capacities, weights,
         # A distribution is only allowed if the changes in comb move less than 
         # the maximum number of allowed changes, even with weigths applies
         weight = change_weight(changes, weights)
-        if weight <= 2*k:
+        if weight <= k:
             cur_norm = norm_from_dist(data, dist, norm, capacities) + penalties[weight]
             
             if cur_norm < best_norm:
@@ -109,3 +120,4 @@ def k_step_brute_force(data, k, initial_distribution, norm, capacities, weights,
                 best_norm = cur_norm
     
     return best_dist
+
