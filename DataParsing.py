@@ -9,7 +9,6 @@ import DataProcessing as dp
 --------- CONTENT ---------
 This file contains a couple of functions regarding parsing of the data as well as
 all manual datahandling lines of consideration.
-
 Functions:
     read_data and read_data2 both are parsing functions
         read_data is for csv files with several columns per rows
@@ -17,7 +16,6 @@ Functions:
             groups under each other
     date_linspace creates a linearly spaced vector of datetime elements
     grab_year takes a specific year of the full data
-
 Manual data handling:
     After the functions are several lines of code for some of the stations
     The data from the csv file is stored as a numpy variable (.npy), after which

@@ -6,7 +6,7 @@ import DataProcessing as dpr
 import DataParsing as dpa
 from calendar import isleap
 
-def generate_data(power,time,timeDiff):
+def generate_data(power,time,timeDiff, day_variance, week_variance):
     """
     INPUTS: power, time for one year
     OUTPUTS: powerNew generated pseudorandomly from power
@@ -28,7 +28,7 @@ def generate_data(power,time,timeDiff):
     isLeapYear = isleap(time[0].year) # To account for a leap year
     for group in range(totalGroups):
         powerGroupNew = np.array([]) # powerNew for a given group
-        for day in range(365+int(isLeapYear)): # Generate new data per day
+        for day in range(365 + int(isLeapYear)): # Generate new data per day
             ''' Pseudorandom '''
             currentDate = time[day*24*60//timeDiff]
             if currentDate.weekday() >= 0 and currentDate.weekday() <= 4: # Weekdays
@@ -47,9 +47,9 @@ def generate_data(power,time,timeDiff):
 
             ''' Generate noise '''
             dayAverage = np.mean(powerDay)
-            powerDay += random.normalvariate(dayAverage,dayAverage/25)-dayAverage # Standard deviation is variable
+            powerDay += random.normalvariate(dayAverage,dayAverage/day_variance)-dayAverage # Standard deviation is variable
             if day % 14 == 0: # Large scale period is variable
-                weekRandom = random.normalvariate(dayAverage,dayAverage/10)-dayAverage # Standard deviation is variable
+                weekRandom = random.normalvariate(dayAverage,dayAverage/week_variance)-dayAverage # Standard deviation is variable
             powerDay += weekRandom
 
             powerGroupNew = np.append(powerGroupNew,powerDay)

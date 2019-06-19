@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import datetime
+import functools
 
 # Enter directory of you files here, so that python knows where to look
 file_dir = r'C:\users\dionl\Documenten\Modellenpracticum'
@@ -49,18 +50,25 @@ def plot_solution(power, sol):
         plt.plot(tot)
         plt.show()
 
-def sol_norms(power, sol, Norm, capacities):
+def sol_norms(power, sol, Norm, capacities, print_flag = True):
+    maximum = 0
     for i in range(len(sol)):
         group = sol[i]
         tot = np.zeros(len(power[0]))
         for val in group:
             tot += power[val]
-        print(Norm(tot)/capacities[i])
+        norm = Norm(tot) / capacities[i]
+        if print_flag:
+            print(norm)
+        if norm > maximum:
+            maximum = norm
+    if not print_flag:
+        return maximum
 #%%
 # Capacity condition: I x Ubase x sqrt(3) < BZSV
 
 Ubase = 10500 # (V)
-station = r'HoogteKadijk'
+station = r'Uilenburg'
 
 base_path = r'C:\Users\dionl\Documents\Modellenpracticum\Power npy\metingen_'
 power_path = base_path + station + r'.npy'
@@ -74,6 +82,7 @@ if station == r'Bemmel':
     groups = groups[[0,1,2,3,4,5,6,7,8,9,10,11,12,23,24,25,26,27]]
     power = power[:,[0,1,2,3,4,5,6,7,8,9,10,11,12,23,24,25,26,27]]
     initial = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],[15,16,17]]
+    reserves = []
     
     rows_to_trim = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 16]
     weights = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -83,6 +92,7 @@ elif station == r'HoogteKadijk':
     groups = groups[[2,3,5,9,11,13,14,15,17,23,26,27,28,29,30,31,32,35,38,41,44,47,50,53,56,59,62,65,68,71,74,75,78,79,82,83,84,85,86,87,90,93,94,95,98,101,104,107]]
     power = power[:,[2,3,5,9,11,13,14,15,17,23,26,27,28,29,30,31,32,35,38,41,44,47,50,53,56,59,62,65,68,71,74,75,78,79,82,83,84,85,86,87,90,93,94,95,98,101,104,107]]
     initial = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],[24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47]]
+    reserves = []
     
     rows_to_trim = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 31, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 47]
     weights = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -97,7 +107,9 @@ elif station == r'Uilenburg':
     power[:,[8]] = power[:,[8]]+power[:,[9]] # V124 - V126
     groups = np.delete(groups,[2,9])
     power = np.delete(power,[2,9],1)
-    initial = [[0,1,3,4,5,6,7,8,10],[11,12,13,14,15,16,17,18,19,20]]
+    #initial = [[0,1,3,4,5,6,7,8,10],[11,12,13,14,15,16,17,18,19,20]]
+    initial = [[0,1,2,3,4,5,6,7,8], [9,10,11,12,13,14,15,16,17,18]]
+    reserves = []
     
     rows_to_trim = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
     weights = [2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1]
@@ -122,7 +134,8 @@ elif station == r'Emmeloord':
     power[:,[21]] = power[:,[21]]+power[:,[25]] # 13 - 09
     groups = np.delete(groups,[2,6,7,8,9,10,11,12,16,18,22,25])
     power = np.delete(power,[2,6,7,8,9,10,11,12,16,18,22,25],1)
-    initial = [[0,1,3,4,5,13,14],[15,17,19,20,21,23,24,26,27]]
+    initial = [[0,1,2,3,4,5,6], [7,8,9,10,11,12,13,14,15]]
+    reserves = [5, 7, 8, 10, 11, 12, 13, 14, 15]
     
     rows_to_trim = [2, 3, 5, 7, 8, 10, 11, 12, 13, 14, 15]
     weights = [3,3,2,2,3,1,1,2,2,2,1,2,1,1,1,1]
@@ -145,6 +158,8 @@ elif station == r'Rijksuniversiteit':
     groups = np.delete(groups,[7,13,14,16,17,21,23,25,27,29])
     power = np.delete(power,[7,13,14,16,17,21,23,25,27,29],1)
     initial = [[0,1,2,3,4,5,6],[8,9,10,11,12,15,18,19,20,22,24,26,28]]
+    initial = [[0,1,2,3,4,5,6], [7, 11, 12, 13, 14, 15, 16, 17, 18, 19]]
+    reserves = []
     
     rows_to_trim = [0, 1, 2, 3, 4, 6, 7, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     weights = [1,1,1,1,1,1,2,3,1,1,1,1,2,2,2,1,1,1,1,1]
@@ -165,17 +180,20 @@ elif station == r'Winselingseweg':
     power[:,[44]] = power[:,[44]]+power[:,[45]] # 2.18 - 2.19
     groups = np.delete(groups,[1,2,3,6,17,24,27,28,29,35,40,42,45])
     power = np.delete(power,[1,2,3,6,17,24,27,28,29,35,40,42,45],1)
-    initial = [[0,4,5,7,8,9,10,11,12,13,14,15,16,18,19,20],[21,22,23,25,26],[30,31,32,33,34,36,37,38,39,41,43,44]]
+    initial = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25,26,27,28,29,30,31,32]]
+    reserves = []
     
-    rows_to_trim = []
+    rows_to_trim = [1, 3, 6, 7, 9, 10, 17, 22, 25, 29]
     weights = [5,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,4,1,1,1,2,1,2,1,1,1,1,2,1,2]
 
 
 power = np.transpose(np.array(power))
 time = dpa.date_linspace(datetime.datetime(2016,1,1,0,0),datetime.datetime(2019,1,1,0,0),datetime.timedelta(minutes=5))
-#power,time = dpa.grab_year(power,time,2016)
+
 power = dpr.auto_trim(power, rows_to_trim, 5)
+
 print("Trimmed")
+
 new_power = []
 min_length = len(power[0])
 for row in power:
@@ -186,17 +204,213 @@ for row in power:
     new_power.append(row[0:min_length])
 power = new_power
 
+new_initial = []
+for group in initial:
+    new_group = []
+    for i in group:
+        if i not in reserves:
+            new_group.append(i)
+    new_initial.append(new_group)
+initial = new_initial
 #%%
-if False:
-    sol = LBF.k_step_brute_force(power, 3, initial, MaxNorm, BZSV, weights)
-    plot_solution(power, sol)
+
+# Normalize the BZSV to show percentage of maximal capacity.
+for i in range(len(BZSV)):
+    BZSV[i] = BZSV[i] * 10**4 / (Ubase * np.sqrt(3))
+
 
 #%%
+if False:
+    # The code in this block is for reading the old data
+    power1, time1, timeDiff1 = dpa.read_data(r'C:\Users\dionl\Documents\Modellenpracticum\Data\OS Bemmel data 2018 inst 1.csv')
+    power2, time2, timeDiff2 = dpa.read_data(r'C:\Users\dionl\Documents\Modellenpracticum\Data\OS Bemmel data 2018 inst 2.csv')
+    power1 = np.transpose(power1)
+    power2 = np.transpose(power2)
+    power = []
+    rows_to_trim1 = [1, 3, 4, 5, 7, 9, 10, 14]
+    rows_to_trim2 = [1]
+    power1 = dpr.auto_trim(power1, rows_to_trim1, timeDiff1)
+    power2 = dpr.auto_trim(power2, rows_to_trim2, timeDiff2)
+    for row in power1:
+        power.append(row)
+    for row in power2:
+        power.append(row)
+    
+    new_power = []
+    min_length = len(power[0])
+    for row in power:
+        if len(row) < min_length:
+            min_length = len(row)
+            
+    for row in power:
+        new_power.append(row[0:min_length])
+    power = new_power
+    
+    
+    tot1 = np.zeros(35040)
+    tot2 = np.zeros(35040)
+    for i in initial[0]:
+        tot1 += power[i]
+    for i in initial[1]:
+        tot2 += power[i]
+    tot1 = tot1 / BZSV[0]
+    tot2 = tot2 / BZSV[1]
+    plt.xlabel("Tijd")
+    plt.ylabel("Percentage van maximumcapaciteit")
+    plt.ylim(-10, 100)
+    plt.plot(tot1)
+    plt.show()
+    plt.xlabel("Tijd")
+    plt.ylabel("Percentage van maximumcapaciteit")
+    plt.ylim(-10, 100)
+    plt.plot(tot2)
+    plt.show()
+    
+#%%
 if True:
-    solutions, norms = MCT.MonteCarlo(initial, power, stekker, weights, BZSV, 50000, 10, MaxNorm, 100, "twist")
+    # Limited brute force
+    sol = LBF.k_step_brute_force(power, 3, initial, stekker, MaxNorm, BZSV, weights)
+    plot_solution(power, sol)
+    sol_norms(power, sol, MaxNorm, BZSV)
+if False:
+    # Standard Monte Carlo
+    solutions, norms = MCT.MonteCarlo(initial, power, stekker, weights, BZSV, 5000, 10, MaxNorm, 100, "twist")
     best_sol = solutions[0]
     plot_solution(power, best_sol)
+    print("Norms of best distribution:")
     sol_norms(power, best_sol, MaxNorm, BZSV)
-    Aux.DrawDistanceFunction(solutions, weights)
+    print("Norms of initial distribution:")
+    sol_norms(power, initial, MaxNorm, BZSV)
+    Aux.DrawDistanceFunction(solutions, weights, initial)
     Aux.PlotAllSolutions(norms)
+
+#%%
+if False:
+    # Generate solution for 2016 and plot its norms
+    power2016, time2016 = dpa.grab_year(np.transpose(power), time, 2016)
+    power2016 = np.transpose(power2016)
+    power2017 = np.transpose(dpa.grab_year(np.transpose(power), time, 2017)[0])
+    power2018 = np.transpose(dpa.grab_year(np.transpose(power), time, 2018)[0])
+
+
+    solutions2016, norms2016 = MCT.MonteCarlo(initial, power2016, stekker, weights, BZSV, 5000, 10, MaxNorm, 20, "twist")
+    sol_norms(power2016, solutions2016[0], MaxNorm, BZSV)
+    if False:
+        for i in range(len(solutions2016)):
+            sol = solutions[i]
+            print("\nNorms of solution " + str(i) + " in year 2017")
+            sol_norms(power2017, sol, MaxNorm, BZSV)
+            print("Year 2018")
+            sol_norms(power2018, sol, MaxNorm, BZSV)
+
+#%%
+if False:
+    # Generate two years of random data and compare to solution of 2016
+    day_var = 30
+    week_var = 15
+    powerNoise = gd.generate_data(np.transpose(power2016),time2016,5, day_var, week_var)
+    powerSmoothNoise = gd.smoothNoise(powerNoise,10, time2016) # rank is variable
+    powerNoise2 = gd.generate_data(np.array(powerSmoothNoise), time2016, 5, day_var, week_var)
+    powerSmoothNoise2 = gd.smoothNoise(powerNoise2, 10, time2016)
     
+    powerSmoothNoise = np.transpose(powerSmoothNoise)
+    powerSmoothNoise2 = np.transpose(powerSmoothNoise2)
+    
+    smoothsol1, norms1 = MCT.MonteCarlo(initial, powerSmoothNoise, stekker, weights, BZSV, 5000, 10, MaxNorm, 1, "twist")
+    smoothsol2, norms2 = MCT.MonteCarlo(initial, powerSmoothNoise2, stekker, weights, BZSV, 5000, 10, MaxNorm, 1, "twist")
+    
+    plt.ylim(-3,10)
+    x = np.array([0, 1, 2])
+    x_ticks = ["2016", "Random data 1", "Random data 2"]
+    plt.xticks(x, x_ticks)
+    
+    for i in range(len(solutions2016)):
+        sol = solutions2016[i]
+        realdiff = sol_norms(power2016, sol, MaxNorm, BZSV, False) - sol_norms(power2016, solutions2016[0], MaxNorm, BZSV, False)
+        randomdiff1 = sol_norms(powerSmoothNoise, sol, MaxNorm, BZSV, False) - sol_norms(powerSmoothNoise, smoothsol1[0], MaxNorm, BZSV, False)
+        randomdiff2 = sol_norms(powerSmoothNoise2, sol, MaxNorm, BZSV, False) - sol_norms(powerSmoothNoise2, smoothsol2[0], MaxNorm, BZSV, False)
+        plt.plot(x, [realdiff, randomdiff1, randomdiff2])
+    plt.ylabel("Afstand tot beste oplossing")
+    plt.show()
+#%%     
+
+if False:
+    # Generate solutions based on data for 2017 and 2018 and compare to 2016 solution
+    solutions2017, norms2017 = MCT.MonteCarlo(initial, power2017, stekker, weights, BZSV, 5000, 10, MaxNorm, 1, "twist")
+    solutions2018, norms2018 = MCT.MonteCarlo(initial, power2018, stekker, weights, BZSV, 5000, 10, MaxNorm, 1, "twist")
+    #%%
+    qualities = []
+    x = np.array([0, 1, 2])
+    x_ticks = ["2016", "2017", "2018"]
+    plt.ylim(-3,10)
+    plt.xticks(x, x_ticks)
+    for i in range(len(solutions2016)):
+        sol = solutions2016[i]
+        diff16 = sol_norms(power2016, sol, MaxNorm, BZSV, False) - sol_norms(power2016, solutions2016[0], MaxNorm, BZSV, False)
+        diff17 = sol_norms(power2017, sol, MaxNorm, BZSV, False) - sol_norms(power2017, solutions2017[0], MaxNorm, BZSV, False)
+        diff18 = sol_norms(power2018, sol, MaxNorm, BZSV, False) - sol_norms(power2018, solutions2018[0], MaxNorm, BZSV, False)
+        plt.plot(x, [diff16, diff17, diff18])
+        quality = np.sqrt(diff16**2 + diff17**2 + diff18**2)
+        qualities.append(quality)
+    plt.xlabel("Jaar")
+    plt.ylabel("Afstand tot beste oplossing")
+    plt.show()
+    best_i = 0
+    best_qual = qualities[0]
+    for i in range(len(qualities)):
+        qual = qualities[i]
+        if qual < best_qual:
+            best_qual = qual
+            best_i = i
+    qualities.sort()
+    x_ticks = list(range(1,21))
+    x = list(range(20))
+    plt.xticks(x, x_ticks)
+    plt.xlabel("Oplossingen")
+    plt.ylabel("Kwaliteit")
+    plt.plot(qualities, "ro")
+    plt.show()
+    print(best_i, solutions2016[best_i], best_qual)
+
+#%%
+if False:    
+    # Does it matter if we take a dataset with less points?
+    reduced_power = dpr.to_quarter(power2016)
+    quarter_sols, quarter_norms = MCT.MonteCarlo(initial, reduced_power, stekker, weights, BZSV, 5000, 10, MaxNorm, 20, "twist")
+    differences = []
+    for i in range(len(quarter_sols)):
+        differences.append(sol_norms(power2016, quarter_sols[i], MaxNorm, BZSV, False) - sol_norms(power2016, solutions2016[i], MaxNorm, BZSV, False))
+    differences.sort()
+    plt.ylabel("Verschil tussen data per 5 minuten\nen data per 15 minuten")
+    x_ticks = list(range(1,21))
+    x = list(range(20))
+    plt.xticks(x, x_ticks)
+    plt.plot(differences, "ro")
+    plt.show()
+
+#%%
+if False:
+    day_var = 30
+    week_var = 15
+    datasets = [power2016]
+    solutions = []
+    for i in range(5):
+        random_data = gd.generate_data(np.transpose(datasets[i]),time2016,5, day_var, week_var)
+        datasets.append(np.transpose(gd.smoothNoise(random_data,10, time2016))) # rank is variable
+    new_datasets = []
+    for dataset in datasets:
+        new_datasets.append(dpr.to_quarter(dataset))
+    for i in range(1, 6):
+        sol, norm = MCT.MonteCarlo(initial, new_datasets[i], stekker, weights, BZSV, 5000, 10, MaxNorm, 1, "twist")
+        solutions.append(sol[0])
+
+    best_values = [sol_norms(power2016, solutions2016[0], MaxNorm, BZSV, False)]
+    for i in range(1,6):
+        best_values.append(sol_norms(new_datasets[i], solutions[i-1], MaxNorm, BZSV, False))
+    solutions2016 = solutions2016[0:10]
+    for sol in solutions2016:
+        differences = []
+        for i in range(6):
+            differences.append(sol_norms(new_datasets[i], sol, MaxNorm, BZSV, False) - best_values[i])
+        plt.plot(differences) 
+    plt.show()
