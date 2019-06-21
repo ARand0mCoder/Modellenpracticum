@@ -441,3 +441,9 @@ def less_data_points(power2016, solutions2016, initial, stekker, weights, iterat
     plt.xticks(x, x_ticks)
     plt.plot(differences, "ro")
     plt.show()
+    
+power = Bemmel2018()
+MonteCarlo(power, initial, stekker, functools.partial(Highest_k_Norm_sum, 100), BZSV, weights, 5000, 100, 10)
+MonteCarlo(power, initial, stekker, MaxNorm, BZSV, weights, 5000, 100, 10)
+#power2016, time2016, solutions2016, power2017, power2018 = Stability_and_quality(power, time, stekker, weights, BZSV, 5000, 10, MaxNorm)
+#RandomData(power2016, time2016, solutions2016, stekker, weights, BZSV, MaxNorm, 5000, 10)
