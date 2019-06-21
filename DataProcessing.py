@@ -45,33 +45,6 @@ data into groups of three, and taking the average of every such group.
 '''
 
 
-''' All data throughout the year '''
-def plot_data(power, time):
-    for group in range(len(power[0])):
-        # plt.figure()
-        data = [line[group] for line in power]
-        plt.plot(time,data)
-    plt.show()
-
-#%%
-
-''' One specific time throughout the year '''
-def plot_specific_time(power, time, hour, minute):
-    timeData = datetime.time(hour,minute)
-
-    for group in range(len(power[0])):
-        Xdata = []
-        Ydata = []
-        for i in range(len(power)):
-            if time[i].time() == timeData:
-                Xdata.append(time[i])
-                Ydata.append(power[i][group])
-        plt.plot(Xdata,Ydata)
-    plt.show()
-
-
-#%%
-
 # Trim one row, where the maximal value of every day is given.
 def trimmed_row(row, avg, row_length, timeDiff, maximums):
     # The suggested row will eventually be the trimmed row, it is built day by
@@ -167,10 +140,8 @@ def manual_trim(power, timeDiff):
         print(avg)
 
         suggested_row = trimmed_row(row, avg, row_length, timeDiff, maximums)
-        #plt.ylim(0, max(maximums))
         plt.plot(suggested_row)
         plt.show()
-        #plt.ylim(0, max(maximums))
         plt.plot(row)
         plt.show()
         trim = input("Do you want to trim this? Enter 'y' or 'n' for yes or no.")
